@@ -38,6 +38,7 @@ main {
   position: relative;
   display: flex;
   /* overflow: hidden; */
+  transition: transform 0.5s ease-in-out;
 }
 
 /* .yp-slider__slide:nth-child(1) {

@@ -36,7 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // check the current index
       currentIndex === 0 ? (currentIndex = slides.length - 1) : currentIndex--;
 
-      console.log(currentIndex);
+      // move the slider track to the right
+      updateSliderPosition(sliderTrack, currentIndex, visibleSlides);
     });
 
     // add event listeners the right button
@@ -44,16 +45,50 @@ document.addEventListener("DOMContentLoaded", () => {
       // check the current index
       currentIndex === slides.length - 1 ? (currentIndex = 0) : currentIndex++;
 
-      console.log(currentIndex);
+      // move the slider track to the left by the slide width
+      updateSliderPosition(sliderTrack, currentIndex, visibleSlides);
     });
+  };
+
+  // get the slide width
+  const getSlideWidth = (slider, visibleSlides) => {
+    const sliderWidth = slider.getBoundingClientRect().width;
+    const slideWidth = sliderWidth / visibleSlides;
+
+    return slideWidth;
   };
 
   // updates the slider track with the new slides
   const updateSliderTrack = (slides, sliderTrack, visibleSlides) => {
     // create the total slides array by cloning the slides
     const slidesLength = slides.length;
-    const startSlides = slides.map((slide) => slide.cloneNode(true));
 
+    const startSlides = cloneStartSlides(slides, sliderTrack, visibleSlides);
+    const endSlides = cloneEndSlides(
+      slides,
+      sliderTrack,
+      visibleSlides,
+      slidesLength
+    );
+
+    const totalSlides = [...startSlides.reverse(), ...slides, ...endSlides];
+
+    return totalSlides;
+  };
+
+  // clone the start slides
+  const cloneStartSlides = (slides, sliderTrack, visibleSlides) => {
+    const startSlides = slides.map((slide) => slide.cloneNode(true));
+    startSlides.reverse().forEach((slide) => {
+      slide.classList.add("yp-slider__slide--cloned");
+      sliderTrack.insertBefore(slide, sliderTrack.firstChild);
+    });
+
+    return startSlides;
+  };
+
+  // clone the end slides
+  const cloneEndSlides = (slides, sliderTrack, visibleSlides, slidesLength) => {
     const endSlides =
       visibleSlides < slides.length
         ? slides
@@ -61,25 +96,23 @@ document.addEventListener("DOMContentLoaded", () => {
             .map((slide) => slide.cloneNode(true))
         : slides.map((slide) => slide.cloneNode(true));
 
-    startSlides.reverse().forEach((slide) => {
-      slide.classList.add("yp-slider__slide--cloned");
-      sliderTrack.insertBefore(slide, sliderTrack.firstChild);
-    });
-
     endSlides.forEach((slide) => {
       slide.classList.add("yp-slider__slide--cloned");
       sliderTrack.appendChild(slide);
     });
 
-    const totalSlides = [...startSlides.reverse(), ...slides, ...endSlides];
+    return endSlides;
+  };
 
-    return totalSlides;
+  // update the position of the slider track
+  const updateSliderPosition = (sliderTrack, currentIndex, visibleSlides) => {
+    const newPosition = -currentIndex * getSlideWidth(slider, visibleSlides);
+    sliderTrack.style.transform = `translateX(${newPosition}px)`;
   };
 
   // updates the slide width to fit the slider track
   const initSlider = (slider, slides, sliderTrack, visibleSlides) => {
-    const sliderWidth = slider.getBoundingClientRect().width;
-    const slideWidth = sliderWidth / visibleSlides;
+    const slideWidth = getSlideWidth(slider, visibleSlides);
 
     slides.forEach((slide) => {
       slide.style.width = `${slideWidth}px`;
@@ -88,8 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
     sliderTrack.style.transform = `translateX(-${
       slideWidth * visibleSlides
     }px)`;
-
-    console.log(visibleSlides);
   };
 
   buildSlider(slider, 3);
