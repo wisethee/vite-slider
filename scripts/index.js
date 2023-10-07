@@ -23,12 +23,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // shift the slider track to the left by the width of one slide
     shiftSliderTrack(totalSlides, sliderTrack, slideWidth);
 
+    let isAnimating = false;
+
     leftButton.addEventListener("click", () => {
-      shiftSlidesLeft(totalSlides, sliderTrack);
+      if (!isAnimating) {
+        isAnimating = true;
+        animateSliderTrack(sliderTrack, slideWidth, () => {
+          isAnimating = false;
+        });
+      }
     });
 
     rightButton.addEventListener("click", () => {
-      shiftSlidesRight(totalSlides, sliderTrack, slideWidth);
+      if (!isAnimating) {
+        isAnimating = true;
+        animateSliderTrack(sliderTrack, -slideWidth, () => {
+          isAnimating = false;
+        });
+      }
     });
   };
 
@@ -46,29 +58,39 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  // shifts the slides to the left
-  const shiftSlidesLeft = (totalSlides, sliderTrack) => {
-    const lastSlide = totalSlides.pop();
-    const secondToLastSlide =
-      totalSlides[totalSlides.length - 2].cloneNode(true);
-    totalSlides.unshift(secondToLastSlide);
-    updateSliderTrack(sliderTrack, totalSlides);
-  };
-
-  // shifts the slides to the right
-  const shiftSlidesRight = (totalSlides, sliderTrack, slideWidth) => {
-    sliderTrack.style.transform = `translateX(${-slideWidth});`;
-
-    const firstSlide = totalSlides.shift();
-    const secondSlide = totalSlides[1].cloneNode(true);
-    totalSlides.push(secondSlide);
-    updateSliderTrack(sliderTrack, totalSlides);
-  };
-
   const shiftSliderTrack = (totalSlides, sliderTrack, slideWidth) => {
     totalSlides.forEach((slide) => (slide.style.width = `${slideWidth}px`));
     sliderTrack.style.transform = `translateX(-${slideWidth}px)`;
   };
 
-  buildSlider(slider, 3);
+  const animateSliderTrack = (
+    sliderTrack,
+    offset,
+    onComplete,
+    duration = 500
+  ) => {
+    const startTime = performance.now();
+    const initialTransform = parseFloat(
+      getComputedStyle(sliderTrack).transform.split(",")[4]
+    );
+
+    const animate = (currentTime) => {
+      const progress = (currentTime - startTime) / duration;
+
+      if (progress < 1) {
+        const newOffset = initialTransform + offset * progress;
+        sliderTrack.style.transform = `translateX(${newOffset}px)`;
+        requestAnimationFrame(animate);
+      } else {
+        sliderTrack.style.transform = `translateX(${
+          initialTransform + offset
+        }px)`;
+        onComplete();
+      }
+    };
+
+    requestAnimationFrame(animate);
+  };
+
+  buildSlider(slider, 6);
 });
