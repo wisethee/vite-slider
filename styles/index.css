@@ -37,7 +37,7 @@ main {
   width: max-content;
   position: relative;
   display: flex;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 /* .yp-slider__slide:nth-child(1) {
