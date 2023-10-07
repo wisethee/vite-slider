@@ -33,9 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // check the current index
       currentIndex === 0 ? (currentIndex = slides.length - 1) : currentIndex--;
 
-      console.log(currentIndex);
       // remove the remove the last slide from the DOM and add a new one at the beginning based on the currentIndex
-      // ...
+      shiftSlider(currentIndex, "right");
     });
 
     // add event listeners the right button
@@ -43,10 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
       // check the current index
       currentIndex === slides.length - 1 ? (currentIndex = 0) : currentIndex++;
 
-      console.log(currentIndex);
       // remove the remove the first slide and add a new one at the end based on the currentIndex
-      // ...
+      shiftSlider(currentIndex, "left");
     });
+  };
+
+  const shiftSlider = (currentIndex, direction) => {
+    console.log("shiftSlider", currentIndex, direction);
   };
 
   // get the slide width
@@ -57,7 +59,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return slideWidth;
   };
 
+  // clone the first and last slide and add them to the slider,
+  // set the width of the slides and set the initial position
+  // of the slider track
   const initSlider = (slides, sliderTrack, visibleSlides) => {
+    const slideWidth = getSlideWidth(slider, visibleSlides);
+
     const firstSlide = slides[slides.length - 1].cloneNode(true);
     sliderTrack.prepend(firstSlide);
 
@@ -70,8 +77,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalSlides = [firstSlide, ...slides, lastSlide];
 
     totalSlides.forEach((slide) => {
-      slide.style.width = `${getSlideWidth(slider, visibleSlides)}px`;
+      slide.style.width = `${slideWidth}px`;
     });
+
+    sliderTrack.style.transform = `translateX(-${slideWidth}px)`;
   };
 
   buildSlider(slider, 4);
