@@ -9,8 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // get the slider elements
     const sliderTrack = slider.querySelector(".yp-slider__track");
     const slides = Array.from(slider.querySelectorAll(".yp-slider__slide"));
-    const leftButton = slider.querySelector(".yp-slider__button-left");
-    const rightButton = slider.querySelector(".yp-slider__button-right");
+
+    // get the slider buttons
+    const [leftButton, rightButton] = [
+      ".yp-slider__button-left",
+      ".yp-slider__button-right",
+    ].map((selector) => slider.querySelector(selector));
 
     // check if slider elements exist
     if (!sliderTrack || !slides || !leftButton || !rightButton) return;
