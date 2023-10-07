@@ -19,33 +19,32 @@ document.addEventListener("DOMContentLoaded", () => {
     // check if slider elements exist
     if (!sliderTrack || !slides || !leftButton || !rightButton) return;
 
-    let isAnimating = false;
+    // check if the visibleSlides is less than the total slides the visible slides should be the total slides
+    if (visibleSlides > slides.length) visibleSlides = slides.length;
+
+    // default variables
+    let currentIndex = 0;
 
     // update the slider track by cloning the slides
     const totalSlides = updateSliderTrack(slides, sliderTrack, visibleSlides);
 
     // update the slide width to fit the slider track
-    updateSlideWidth(slider, totalSlides, visibleSlides);
+    initSlider(slider, totalSlides, sliderTrack, visibleSlides);
 
-    // shift the slider track to the beginning
-    shiftSliderTrack(sliderTrack, slider);
-
+    // add event listeners the left button
     leftButton.addEventListener("click", () => {
-      if (!isAnimating) {
-        //   isAnimating = true;
-        //   animateSliderTrack(sliderTrack, slideWidth, () => {
-        //     isAnimating = false;
-        //   });
-      }
+      // check the current index
+      currentIndex === 0 ? (currentIndex = slides.length - 1) : currentIndex--;
+
+      console.log(currentIndex);
     });
 
+    // add event listeners the right button
     rightButton.addEventListener("click", () => {
-      if (!isAnimating) {
-        //   isAnimating = true;
-        //   animateSliderTrack(sliderTrack, -slideWidth, () => {
-        //     isAnimating = false;
-        //   });
-      }
+      // check the current index
+      currentIndex === slides.length - 1 ? (currentIndex = 0) : currentIndex++;
+
+      console.log(currentIndex);
     });
   };
 
@@ -78,49 +77,20 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // updates the slide width to fit the slider track
-  const updateSlideWidth = (slider, slides, visibleSlides) => {
+  const initSlider = (slider, slides, sliderTrack, visibleSlides) => {
     const sliderWidth = slider.getBoundingClientRect().width;
     const slideWidth = sliderWidth / visibleSlides;
 
     slides.forEach((slide) => {
       slide.style.width = `${slideWidth}px`;
     });
+
+    sliderTrack.style.transform = `translateX(-${
+      slideWidth * visibleSlides
+    }px)`;
+
+    console.log(visibleSlides);
   };
 
-  // shifts the slider track by the given offset
-  const shiftSliderTrack = (sliderTrack, slider) => {
-    sliderTrack.style.transform = `translateX(${-slider.getBoundingClientRect()
-      .width}px)`;
-  };
-
-  const animateSliderTrack = (
-    sliderTrack,
-    offset,
-    onComplete,
-    duration = 500
-  ) => {
-    const startTime = performance.now();
-    const initialTransform = parseFloat(
-      getComputedStyle(sliderTrack).transform.split(",")[4]
-    );
-
-    const animate = (currentTime) => {
-      const progress = (currentTime - startTime) / duration;
-
-      if (progress < 1) {
-        const newOffset = initialTransform + offset * progress;
-        sliderTrack.style.transform = `translateX(${newOffset}px)`;
-        requestAnimationFrame(animate);
-      } else {
-        sliderTrack.style.transform = `translateX(${
-          initialTransform + offset
-        }px)`;
-        onComplete();
-      }
-    };
-
-    requestAnimationFrame(animate);
-  };
-
-  buildSlider(slider, 6);
+  buildSlider(slider, 3);
 });
