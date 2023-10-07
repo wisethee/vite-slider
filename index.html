@@ -6,10 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Slider</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Jost:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="/styles/index.css" />
   </head>
   <body>
-    <div id="app"></div>
+    <main class="main" role="main">
+      <div class="yp-slider">
+        <div class="yp-slider__track">
+          <div class="yp-slider__slide">Slide One</div>
+          <div class="yp-slider__slide">Slide Two</div>
+          <div class="yp-slider__slide">Slide Three</div>
+          <div class="yp-slider__slide">Slide Four</div>
+          <div class="yp-slider__slide">Slide Five</div>
+          <div class="yp-slider__slide">Slide Six</div>
+        </div>
+        <button class="yp-slider__button-left">left</button>
+        <button class="yp-slider__button-right">right</button>
+      </div>
+    </main>
     <script type="module" src="/scripts/index.js"></script>
   </body>
 </html>
