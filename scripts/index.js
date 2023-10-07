@@ -25,11 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // default variables
     let currentIndex = 0;
 
-    // update the slider track by cloning the slides
-    const totalSlides = updateSliderTrack(slides, sliderTrack, visibleSlides);
-
-    // update the slide width to fit the slider track
-    initSlider(slider, totalSlides, sliderTrack, visibleSlides);
+    // initialize the slider
+    initSlider(slides, sliderTrack, visibleSlides);
 
     // add event listeners the left button
     leftButton.addEventListener("click", () => {
@@ -60,64 +57,22 @@ document.addEventListener("DOMContentLoaded", () => {
     return slideWidth;
   };
 
-  // updates the slider track with the new slides
-  const updateSliderTrack = (slides, sliderTrack, visibleSlides) => {
-    // create the total slides array by cloning the slides
-    const slidesLength = slides.length;
+  const initSlider = (slides, sliderTrack, visibleSlides) => {
+    const firstSlide = slides[slides.length - 1].cloneNode(true);
+    sliderTrack.prepend(firstSlide);
 
-    const startSlides = cloneStartSlides(slides, sliderTrack, visibleSlides);
-    const endSlides = cloneEndSlides(
-      slides,
-      sliderTrack,
-      visibleSlides,
-      slidesLength
-    );
+    const lastSlide = !(visibleSlides < slides.length)
+      ? slides[0].cloneNode(true)
+      : null;
 
-    const totalSlides = [...startSlides.reverse(), ...slides, ...endSlides];
+    lastSlide && sliderTrack.append(lastSlide);
 
-    return totalSlides;
-  };
+    const totalSlides = [firstSlide, ...slides, lastSlide];
 
-  // clone the start slides
-  const cloneStartSlides = (slides, sliderTrack, visibleSlides) => {
-    const startSlides = slides.map((slide) => slide.cloneNode(true));
-    startSlides.reverse().forEach((slide) => {
-      slide.classList.add("yp-slider__slide--cloned");
-      sliderTrack.insertBefore(slide, sliderTrack.firstChild);
+    totalSlides.forEach((slide) => {
+      slide.style.width = `${getSlideWidth(slider, visibleSlides)}px`;
     });
-
-    return startSlides;
   };
 
-  // clone the end slides
-  const cloneEndSlides = (slides, sliderTrack, visibleSlides, slidesLength) => {
-    const endSlides =
-      visibleSlides < slides.length
-        ? slides
-            .slice(0, slidesLength - visibleSlides)
-            .map((slide) => slide.cloneNode(true))
-        : slides.map((slide) => slide.cloneNode(true));
-
-    endSlides.forEach((slide) => {
-      slide.classList.add("yp-slider__slide--cloned");
-      sliderTrack.appendChild(slide);
-    });
-
-    return endSlides;
-  };
-
-  // updates the slide width to fit the slider track
-  const initSlider = (slider, slides, sliderTrack, visibleSlides) => {
-    const slideWidth = getSlideWidth(slider, visibleSlides);
-
-    slides.forEach((slide) => {
-      slide.style.width = `${slideWidth}px`;
-    });
-
-    sliderTrack.style.transform = `translateX(-${
-      slideWidth * visibleSlides
-    }px)`;
-  };
-
-  buildSlider(slider, 3);
+  buildSlider(slider, 4);
 });
