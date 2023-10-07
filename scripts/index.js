@@ -36,8 +36,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // check the current index
       currentIndex === 0 ? (currentIndex = slides.length - 1) : currentIndex--;
 
-      // move the slider track to the right
-      updateSliderPosition(sliderTrack, currentIndex, visibleSlides);
+      console.log(currentIndex);
+      // remove the remove the last slide from the DOM and add a new one at the beginning based on the currentIndex
+      // ...
     });
 
     // add event listeners the right button
@@ -45,8 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // check the current index
       currentIndex === slides.length - 1 ? (currentIndex = 0) : currentIndex++;
 
-      // move the slider track to the left by the slide width
-      updateSliderPosition(sliderTrack, currentIndex, visibleSlides);
+      console.log(currentIndex);
+      // remove the remove the first slide and add a new one at the end based on the currentIndex
+      // ...
     });
   };
 
@@ -102,12 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     return endSlides;
-  };
-
-  // update the position of the slider track
-  const updateSliderPosition = (sliderTrack, currentIndex, visibleSlides) => {
-    const newPosition = -currentIndex * getSlideWidth(slider, visibleSlides);
-    sliderTrack.style.transform = `translateX(${newPosition}px)`;
   };
 
   // updates the slide width to fit the slider track
