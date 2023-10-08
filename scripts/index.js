@@ -49,7 +49,19 @@ document.addEventListener("DOMContentLoaded", () => {
     data.currentSlide = ui.slides[data.current];
     data.nextSlide = ui.slides[data.next];
 
+    ui.slides.forEach((slide, index) => {
+      slide.classList.add("yp-slider__slide--animating");
+    });
+
     // ...
+
+    setTimeout(() => {
+      ui.slides.forEach((slide) => {
+        slide.classList.remove("yp-slider__slide--animating");
+      });
+      data.animating = false;
+    }, 500); // Adjust the timeout to match the transition duration
+
     updateSliderPosition(data, ui, data.width);
 
     data.animating = false;
@@ -85,7 +97,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const updateSliderPosition = (data, ui, width) => {
     ui.slides.forEach((slide, index) => {
-      const position = (index - data.current + data.total) % data.total;
+      let position;
+
+      if (data.direction === -1) {
+        // Move the last slide to the beginning when direction is -1
+        position = (index + data.total - data.current) % data.total;
+      } else {
+        position = (index - data.current + data.total) % data.total;
+      }
+
       const translation = position * width;
 
       slide.style.transform = `translateX(${translation}px)`;
@@ -109,8 +129,8 @@ document.addEventListener("DOMContentLoaded", () => {
       slide.style.transform = `translateX(${translation}px)`;
     });
 
-    updateSliderPosition(data, ui, width);
+    ui.track.style.transform = `translateX(${-data.width}px)`;
   };
 
-  buildSlider(slider, 3);
+  buildSlider(slider, 1);
 });
