@@ -42,35 +42,47 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.next.addEventListener("click", () => shiftNext(data, ui));
   };
 
+  // const changeSlide = (data, ui) => {
+  //   data.animating = true;
+
+  //   data.prevSlide = ui.slides[data.prev];
+  //   data.currentSlide = ui.slides[data.current];
+  //   data.nextSlide = ui.slides[data.next];
+
+  //   // ...
+  //   updateSliderPosition(data, ui, data.width);
+
+  //   data.animating = false;
+  // };
+
   const changeSlide = (data, ui) => {
     data.animating = true;
 
-    // remove the active class from all the slides
-    removeAllClasses(ui.slides, "yp-slider__slide--current");
-    removeAllClasses(ui.slides, "yp-slider__slide--next");
-
+    data.prevSlide = ui.slides[data.prev];
     data.currentSlide = ui.slides[data.current];
     data.nextSlide = ui.slides[data.next];
 
-    // add the active class to the current slide
-    data.currentSlide.classList.add("yp-slider__slide--current");
-    data.nextSlide.classList.add("yp-slider__slide--next");
+    // Add animation class
+    ui.slides.forEach((slide) => {
+      slide.classList.add("yp-slider__slide--animating");
+    });
 
     // ...
-    console.log(data.current, data.next);
 
-    data.animating = false;
-  };
+    updateSliderPosition(data, ui, data.width);
 
-  const removeAllClasses = (slides, className) => {
-    slides.forEach((slide) => {
-      slide.classList.remove(`${className}`);
-    });
+    // Remove animation class after the transition ends
+    setTimeout(() => {
+      ui.slides.forEach((slide) => {
+        slide.classList.remove("yp-slider__slide--animating");
+      });
+      data.animating = false;
+    }, 500); // Adjust the timeout to match the transition duration
   };
 
   const shiftPrev = (data, ui) => {
     if (data.animating) return;
-    data.direction = 1;
+    data.direction = -1;
 
     data.prev = data.current;
     data.current = data.prev === 0 ? data.total - 1 : data.prev - 1;
@@ -80,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const shiftNext = (data, ui) => {
     if (data.animating) return;
-    data.direction = -1;
+    data.direction = 1;
 
     data.prev = data.current;
     data.current = data.prev === data.total - 1 ? 0 : data.prev + 1;
@@ -96,6 +108,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return slideWidth;
   };
 
+  const updateSliderPosition = (data, ui, width) => {
+    ui.slides.forEach((slide, index) => {
+      const position = (index - data.current + data.total) % data.total;
+      const translation = position * width;
+
+      slide.style.transform = `translateX(${translation}px)`;
+    });
+  };
+
   // set the width of the slides and set the initial position of the slider track
   const initSlider = (data, ui, width) => {
     // set the width of the slides
@@ -106,11 +127,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // set the initial position of the ui.slides
     ui.slides.forEach((slide, index) => {
       slide.style.transform = `translateX(${index * width}px)`;
+      const translation =
+        index === data.current ? 0 : (index - data.current) * width;
+
+      // set the initial position of the slides
+      slide.style.transform = `translateX(${translation}px)`;
     });
 
-    ui.currentSlide = ui.slides[data.current].classList.add(
-      "yp-slider__slide--current"
-    );
+    updateSliderPosition(data, ui, width);
   };
 
   buildSlider(slider, 3);

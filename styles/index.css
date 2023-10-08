@@ -45,3 +45,7 @@ main {
   padding: 1rem;
   background-color: #fafafa;
 }
+
+.yp-slider__slide--animating {
+  transition: transform 0.5s ease-in-out;
+}
