@@ -37,14 +37,12 @@ main {
   width: max-content;
   position: relative;
   display: flex;
+
   /* overflow: hidden; */
   /* transition: transform 0.5s ease-in-out; */
 }
 
-/* .yp-slider__slide:nth-child(1) {
+.yp-slider__slide {
+  padding: 3rem;
   background-color: #fafafa;
 }
-
-.yp-slider__slide:nth-child(2) {
-  background-color: #988585;
-} */
