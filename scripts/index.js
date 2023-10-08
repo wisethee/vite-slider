@@ -19,6 +19,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (visibleSlides > ui.slides.length) visibleSlides = ui.slides.length;
 
     const data = {
+      animating: false,
+      direction: 0,
+      prev: 0,
+      current: 0,
+      next: 0,
       total: ui.slides.length,
       visible: visibleSlides,
       width: getSlideWidth(slider, visibleSlides),
@@ -26,6 +31,45 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // initialize the slider
     initSlider(data, ui);
+
+    // add event listeners to the prev button
+    ui.prev.addEventListener("click", () => shiftPrev(data, ui));
+
+    // add event listeners to the next button
+    ui.next.addEventListener("click", () => shiftNext(data, ui));
+  };
+
+  const changeSlide = (data, ui) => {
+    data.animating = true;
+
+    data.prevSlide = ui.slides[data.prev];
+    data.currentSlide = ui.slides[data.current];
+    data.nextSlide = ui.slides[data.next];
+
+    // ...
+
+    data.animating = false;
+  };
+
+  const shiftPrev = (data, ui) => {
+    if (data.animating) return;
+
+    data.direction = -1;
+
+    data.prev = data.current;
+    data.current = data.prev === 0 ? data.total - 1 : data.prev - 1;
+    data.next = data.current === 0 ? data.total - 1 : data.current - 1;
+    changeSlide(data, ui);
+  };
+
+  const shiftNext = (data, ui) => {
+    if (data.animating) return;
+    data.direction = 1;
+
+    data.prev = data.current;
+    data.current = data.prev === data.total - 1 ? 0 : data.prev + 1;
+    data.next = data.current === data.total - 1 ? 0 : data.current + 1;
+    changeSlide(data, ui);
   };
 
   // get the slide width
