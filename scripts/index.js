@@ -42,19 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.next.addEventListener("click", () => shiftNext(data, ui));
   };
 
-  // const changeSlide = (data, ui) => {
-  //   data.animating = true;
-
-  //   data.prevSlide = ui.slides[data.prev];
-  //   data.currentSlide = ui.slides[data.current];
-  //   data.nextSlide = ui.slides[data.next];
-
-  //   // ...
-  //   updateSliderPosition(data, ui, data.width);
-
-  //   data.animating = false;
-  // };
-
   const changeSlide = (data, ui) => {
     data.animating = true;
 
@@ -62,22 +49,10 @@ document.addEventListener("DOMContentLoaded", () => {
     data.currentSlide = ui.slides[data.current];
     data.nextSlide = ui.slides[data.next];
 
-    // Add animation class
-    ui.slides.forEach((slide) => {
-      slide.classList.add("yp-slider__slide--animating");
-    });
-
     // ...
-
     updateSliderPosition(data, ui, data.width);
 
-    // Remove animation class after the transition ends
-    setTimeout(() => {
-      ui.slides.forEach((slide) => {
-        slide.classList.remove("yp-slider__slide--animating");
-      });
-      data.animating = false;
-    }, 500); // Adjust the timeout to match the transition duration
+    data.animating = false;
   };
 
   const shiftPrev = (data, ui) => {
