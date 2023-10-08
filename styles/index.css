@@ -27,24 +27,25 @@ main {
 
 /* Slider */
 .yp-slider {
+  position: relative;
   width: 100%;
+  height: 300px;
+  margin: auto;
   overflow: hidden;
 }
 
-.yp-slider__track {
-  position: relative;
-  display: flex;
-  flex-wrap: nowrap;
-  width: max-content;
-  display: flex;
-  min-height: 6rem;
-}
-
 .yp-slider__slide {
+  width: 100%;
+  height: 300px;
   position: absolute;
-  z-index: 0;
+  transition: 0.6s ease;
+  transform: translate(-100%, 0);
 }
 
-.yp-slider__slide--next {
-  transition: all 0.5s ease-in-out;
+.yp-slider__slide.active {
+  transform: translate(0, 0);
+}
+
+.yp-slider__slide.active ~ .yp-slider__slide {
+  transform: translate(100%, 0);
 }
