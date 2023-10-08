@@ -42,6 +42,21 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.next.addEventListener("click", () => shiftNext(data, ui));
   };
 
+  // const changeSlide = (data, ui) => {
+  //   data.animating = true;
+
+  //   data.prevSlide = ui.slides[data.prev];
+  //   data.currentSlide = ui.slides[data.current];
+  //   data.nextSlide = ui.slides[data.next];
+
+  //   data.nextSlide.classList.add("yp-slider__slide--next");
+
+  //   // ...
+  //   updateSliderPosition(data, ui);
+
+  //   data.animating = false;
+  // };
+
   const changeSlide = (data, ui) => {
     data.animating = true;
 
@@ -49,14 +64,42 @@ document.addEventListener("DOMContentLoaded", () => {
     data.currentSlide = ui.slides[data.current];
     data.nextSlide = ui.slides[data.next];
 
-    // ...
-    updateSliderPosition(data, ui);
+    // Step 1: Move all slides to the left
+    ui.slides.forEach((slide, index) => {
+      let position;
 
-    data.animating = false;
+      if (data.direction === -1) {
+        position = (index + data.total - data.current) % data.total;
+      } else {
+        position = (index - data.current + data.total) % data.total;
+      }
+
+      const translation = position * data.width;
+
+      slide.style.transform = `translateX(${translation}px)`;
+    });
+
+    // Step 2: Change opacity of the slide that needs to be moved to the right
+    data.nextSlide.classList.add("yp-slider__slide--next");
+    data.nextSlide.style.opacity = 0;
+
+    // Trigger layout to ensure opacity transition starts from 0
+    data.nextSlide.offsetHeight;
+
+    // Add a small delay before changing the opacity to ensure the first animation is complete
+    setTimeout(() => {
+      data.nextSlide.style.opacity = 1;
+
+      // Step 3: Update the slider position and complete the animation
+      updateSliderPosition(data, ui);
+
+      data.animating = false;
+    }, 50); // Adjust the delay as needed
   };
 
   const shiftPrev = (data, ui) => {
     if (data.animating) return;
+
     data.direction = -1;
 
     data.prev = data.current;
@@ -83,12 +126,29 @@ document.addEventListener("DOMContentLoaded", () => {
     return slideWidth;
   };
 
+  // const updateSliderPosition = (data, ui) => {
+  //   ui.slides.forEach((slide, index) => {
+  //     let position;
+
+  //     if (data.direction === -1) {
+  //       // Move the last slide to the beginning when direction is -1
+  //       position = (index + data.total - data.current) % data.total;
+  //     } else {
+  //       position = (index - data.current + data.total) % data.total;
+  //     }
+
+  //     const translation = position * data.width;
+
+  //     slider.dataset.current = data.current;
+  //     slide.style.transform = `translateX(${translation}px)`;
+  //   });
+  // };
+
   const updateSliderPosition = (data, ui) => {
     ui.slides.forEach((slide, index) => {
       let position;
 
       if (data.direction === -1) {
-        // Move the last slide to the beginning when direction is -1
         position = (index + data.total - data.current) % data.total;
       } else {
         position = (index - data.current + data.total) % data.total;
@@ -96,7 +156,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const translation = position * data.width;
 
+      slider.dataset.current = data.current;
       slide.style.transform = `translateX(${translation}px)`;
+
+      // Add opacity transition logic separately
+      if (data.direction === 1 && index === data.current) {
+        slide.style.opacity = 0;
+      } else {
+        slide.style.opacity = 1;
+      }
     });
   };
 

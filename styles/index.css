@@ -42,6 +42,9 @@ main {
 
 .yp-slider__slide {
   position: absolute;
-  padding: 1rem;
   z-index: 0;
+}
+
+.yp-slider__slide--next {
+  transition: all 0.5s ease-in-out;
 }
