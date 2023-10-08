@@ -6,88 +6,51 @@ document.addEventListener("DOMContentLoaded", () => {
     // check if slider exists
     if (!slider) return;
 
-    // get the slider elements
-    const sliderTrack = slider.querySelector(".yp-slider__track");
-    const slides = Array.from(slider.querySelectorAll(".yp-slider__slide"));
-
-    // get the slider buttons
-    const [prevButton, nextButton] = [
-      ".yp-slider__button-prev",
-      ".yp-slider__button-next",
-    ].map((selector) => slider.querySelector(selector));
+    const ui = {
+      track: slider.querySelector(".yp-slider__track"),
+      slides: slider.querySelectorAll(".yp-slider__slide"),
+      prev: slider.querySelector(".yp-slider__button-prev"),
+      next: slider.querySelector(".yp-slider__button-next"),
+    };
 
     // check if slider elements exist
-    if (!sliderTrack || !slides || !prevButton || !nextButton) return;
+    if (!ui.track || !ui.slides || !ui.prev || !ui.next) return;
 
     // check if the visibleSlides is less than the total slides the visible slides should be the total slides
-    if (visibleSlides > slides.length) visibleSlides = slides.length;
+    if (visibleSlides > ui.slides.length) visibleSlides = ui.slides.length;
 
-    // default variables
-    let currentIndex = 0;
+    const data = {
+      current: 0,
+      first: 0,
+      last: 0,
+      direction: 0,
+      total: ui.slides.length,
+      width: getSlideWidth(slider, visibleSlides),
+    };
 
     // initialize the slider
-    initSlider(slides, sliderTrack, visibleSlides);
+    initSlider(ui.slides, data.width);
 
-    // set and array with the total slides
-    let totalSlides = Array.from(sliderTrack.children);
+    // add event listeners to the prev button
+    ui.prev.addEventListener("click", () => {});
 
-    // add event listeners the left button
-    prevButton.addEventListener("click", () => {
-      currentIndex === 0
-        ? (currentIndex = totalSlides.length - 1)
-        : currentIndex--;
-
-      // remove the last slide from the DOM and add a new one at the beginning based on the currentIndex
-      shiftSlider(totalSlides, 1);
-    });
-
-    // add event listeners the right button
-    nextButton.addEventListener("click", () => {
-      currentIndex === totalSlides.length - 1
-        ? (currentIndex = 0)
-        : currentIndex++;
-
-      // remove the first slide and add a new one at the end based on the currentIndex
-      shiftSlider(totalSlides, -1);
-    });
+    // add event listeners to the next button
+    ui.next.addEventListener("click", () => {});
   };
 
-  const shiftSlider = (slides, direction) => {};
-
   // get the slide width
-  const getSlideWidth = (slider, visibleSlides) => {
+  const getSlideWidth = (slider, visible) => {
     const sliderWidth = slider.getBoundingClientRect().width;
-    const slideWidth = sliderWidth / visibleSlides;
+    const slideWidth = sliderWidth / visible;
 
     return slideWidth;
   };
 
-  const cloneSlides = (slides, sliderTrack, visibleSlides) => {
-    const firstSlide = slides[slides.length - 1].cloneNode(true);
-    sliderTrack.prepend(firstSlide);
-    const lastSlide = !(visibleSlides < slides.length)
-      ? slides[0].cloneNode(true)
-      : null;
-
-    lastSlide && sliderTrack.append(lastSlide);
-    const totalSlides = [firstSlide, ...slides, lastSlide];
-
-    return totalSlides;
-  };
-
-  // clone the first and last slide and add them to the slider,
-  // set the width of the slides and set the initial position
-  // of the slider track
-  const initSlider = (slides, sliderTrack, visibleSlides) => {
-    const slideWidth = getSlideWidth(slider, visibleSlides);
-
-    const totalSlides = cloneSlides(slides, sliderTrack, visibleSlides);
-
-    totalSlides.forEach((slide) => {
-      slide.style.width = `${slideWidth}px`;
+  // set the width of the slides and set the initial position of the slider track
+  const initSlider = (slides, width) => {
+    slides.forEach((slide) => {
+      slide.style.width = `${width}px`;
     });
-
-    sliderTrack.style.transform = `translateX(-${slideWidth}px)`;
   };
 
   buildSlider(slider, 4);
