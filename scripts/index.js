@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   const slider = document.querySelector(".yp-slider");
 
   const buildSlider = (slider, visibleSlides) => {
@@ -7,23 +7,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const ui = {
       track: slider.querySelector(".yp-slider__track"),
-      slides: slider.querySelectorAll(".yp-slider__slide"),
+      slides: [...slider.querySelectorAll(".yp-slider__slide")],
       prev: slider.querySelector(".yp-slider__prev"),
       next: slider.querySelector(".yp-slider__next"),
     };
 
     // check if slider elements exist
-    if (!ui.slides || !ui.prev || !ui.next) return;
+    if (!ui.track || !ui.slides || !ui.prev || !ui.next) return;
 
     // check if the visibleSlides is less than the total slides the visible slides should be the total slides
     if (visibleSlides > ui.slides.length) visibleSlides = ui.slides.length;
 
+    // set the initial data
     const data = {
       animating: false,
-      direction: 0,
+      direction: 1,
       prev: 0,
-      current: 0,
-      next: 0,
+      current: 1,
+      next: 2,
       total: ui.slides.length,
       visible: visibleSlides,
       width: getSlideWidth(slider, visibleSlides),
@@ -32,51 +33,168 @@ document.addEventListener("DOMContentLoaded", function () {
     // initialize the slider
     initSlider(data, ui);
 
+    let touchStartX = 0;
+    let touchEndX = 0;
+
     // add event listeners to the prev button
-    ui.prev.addEventListener("click", () => shiftPrev(data, ui));
+    ui.prev.addEventListener("click", () => shiftSlide(data, ui, -1));
 
     // add event listeners to the next button
-    ui.next.addEventListener("click", () => shiftNext(data, ui));
+    ui.next.addEventListener("click", () => shiftSlide(data, ui, 1));
+
+    ui.track.addEventListener("touchstart", function (e) {
+      touchStartX = e.changedTouches[0].clientX;
+    });
+
+    ui.track.addEventListener("touchmove", function (e) {
+      touchEndX = e.changedTouches[0].clientX;
+    });
+
+    ui.track.addEventListener("touchend", function (e) {
+      handleSwipe(data, ui, touchStartX, touchEndX);
+    });
   };
 
-  const changeSlide = (data, ui) => {
+  const throttle = (func, limit) => {
+    let inThrottle;
+    let lastContext;
+    let lastArgs;
+
+    return function () {
+      const args = arguments;
+      const context = this;
+
+      if (!inThrottle || context !== lastContext || args !== lastArgs) {
+        func.apply(context, args);
+        lastContext = context;
+        lastArgs = args;
+
+        inThrottle = true;
+        setTimeout(() => {
+          inThrottle = false;
+        }, limit);
+      }
+    };
+  };
+
+  // const moveSlide = (data, ui) => {
+  //   if (data.animating) return;
+  //   data.animating = true;
+
+  //   // ...
+  //   requestAnimationFrame(() => {
+  //     if (data.direction === 1) {
+  //       // move the first slide to the end
+  //       ui.track.appendChild(ui.slides[data.prev]);
+  //       ui.slides[data.prev].style.transform = `translateX(${data.width}px)`;
+
+  //       // move current slide to the left
+  //       ui.slides[
+  //         data.current
+  //       ].style.transform = `translateX(-${data.width}px)`;
+
+  //       // move next slide to the current position
+  //       ui.slides[data.next].style.transform = `translateX(0px)`;
+  //     } else if (data.direction === -1) {
+  //       // move the current slide to the end
+  //       ui.slides[data.current].style.transform = `translateX(${data.width}px)`;
+
+  //       // move the first slide to the current position
+  //       ui.slides[data.prev].style.transform = `translateX(0px)`;
+
+  //       // move the last slide to the first position
+  //       ui.track.insertBefore(ui.slides[ui.slides.length - 1], ui.slides[0]);
+  //       ui.slides[
+  //         ui.slides.length - 1
+  //       ].style.transform = `translateX(-${data.width}px)`;
+  //     }
+  //     data.animating = false;
+  //   });
+
+  //   updateSlides(data, ui);
+  // };
+
+  const handleSwipe = (data, ui, touchStartX, touchEndX) => {
+    if (touchEndX < touchStartX) {
+      shiftSlide(data, ui, 1);
+    }
+    if (touchEndX > touchStartX) {
+      shiftSlide(data, ui, -1);
+    }
+    touchStartX = 0;
+    touchEndX = 0;
+  };
+
+  const moveSlide = (data, ui) => {
+    if (data.animating) return;
+
     data.animating = true;
+    let start, progress;
 
-    data.prevSlide = ui.slides[data.prev];
-    data.currentSlide = ui.slides[data.current];
-    data.nextSlide = ui.slides[data.next];
+    const animate = (timestamp) => {
+      if (!start) start = timestamp;
+      progress = timestamp - start;
 
-    // ...
+      if (data.direction === 1) {
+        // move the first slide to the end
+        ui.track.appendChild(ui.slides[data.prev]);
+        ui.slides[data.prev].style.transform = `translateX(${data.width}px)`;
 
-    data.animating = false;
+        // move current slide to the left
+        ui.slides[
+          data.current
+        ].style.transform = `translateX(-${data.width}px)`;
+
+        // move next slide to the current position
+        ui.slides[data.next].style.transform = `translateX(0px)`;
+      } else if (data.direction === -1) {
+        // move the current slide to the end
+        ui.slides[data.current].style.transform = `translateX(${data.width}px)`;
+
+        // move the first slide to the current position
+        ui.slides[data.prev].style.transform = `translateX(0px)`;
+
+        // move the last slide to the first position
+        ui.track.insertBefore(ui.slides[ui.slides.length - 1], ui.slides[0]);
+        ui.slides[
+          ui.slides.length - 1
+        ].style.transform = `translateX(-${data.width}px)`;
+      }
+
+      if (progress < 500) {
+        // if the animation is not finished, continue
+        requestAnimationFrame(animate);
+      } else {
+        // if the animation is finished, update the state
+        data.animating = false;
+        updateSlides(data, ui);
+      }
+    };
+
+    requestAnimationFrame(animate);
   };
 
-  const shiftPrev = (data, ui) => {
+  // const shiftSlide = (data, ui, direction) => {
+  //   if (data.animating) return;
+  //   data.direction = direction;
+  //   moveSlide(data, ui);
+  // };
+
+  const shiftSlide = throttle((data, ui, direction) => {
     if (data.animating) return;
+    data.direction = direction;
+    moveSlide(data, ui);
+  }, 600);
 
-    data.direction = -1;
-
-    data.prev = data.current;
-    data.current = data.prev === 0 ? data.total - 1 : data.prev - 1;
-    data.next = data.current === 0 ? data.total - 1 : data.current - 1;
-    changeSlide(data, ui);
-  };
-
-  const shiftNext = (data, ui) => {
-    if (data.animating) return;
-    data.direction = 1;
-
-    data.prev = data.current;
-    data.current = data.prev === data.total - 1 ? 0 : data.prev + 1;
-    data.next = data.current === data.total - 1 ? 0 : data.current + 1;
-    changeSlide(data, ui);
+  const updateSlides = (data, ui) => {
+    const newSlides = slider.querySelectorAll(".yp-slider__slide");
+    ui.slides = [...newSlides];
   };
 
   // get the slide width
   const getSlideWidth = (slider, visible) => {
     const sliderWidth = slider.getBoundingClientRect().width;
     const slideWidth = sliderWidth / visible;
-
     return slideWidth;
   };
 
@@ -100,57 +218,15 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    // move the last slide before the first
+    // set the slider track height
+    ui.track.style.height = `${ui.slides[0].getBoundingClientRect().height}px`;
+
+    // move last slide to the front
     ui.track.insertBefore(ui.slides[ui.slides.length - 1], ui.slides[0]);
+
+    // update the slides
+    updateSlides(data, ui);
   };
 
   buildSlider(slider, 1);
 });
-
-// document.addEventListener("DOMContentLoaded", function () {
-// Get all the slides
-// var slides = document.querySelectorAll(".yp-slider__slide");
-
-// [1] Move the last slide before the first
-// slides[0].parentNode.insertBefore(slides[slides.length - 1], slides[0]);
-
-//   document.querySelectorAll("button").forEach(function (button) {
-//     button.addEventListener("click", function () {
-//       // Get all the slides again
-//       slides = document.querySelectorAll(".yp-slider__slide");
-//       // Register button
-//       var buttonId = button.id;
-//       // Register active slide
-//       var activeSlide = document.querySelector(".active");
-
-//       // Next function
-//       if (buttonId === "yp-slider__next") {
-//         // Move first slide to the end
-//         slides[slides.length - 1].parentNode.insertBefore(
-//           slides[0],
-//           slides[slides.length - 1].nextSibling
-//         );
-//         // Move active class to the right
-//         activeSlide.classList.remove("active");
-//         if (activeSlide.nextElementSibling) {
-//           activeSlide.nextElementSibling.classList.add("active");
-//         } else {
-//           slides[0].classList.add("active");
-//         }
-//       }
-
-//       // Previous function
-//       if (buttonId === "yp-slider__prev") {
-//         // Move the last slide before the first
-//         slides[0].parentNode.insertBefore(slides[slides.length - 1], slides[0]);
-//         // Move active class to the left
-//         activeSlide.classList.remove("active");
-//         if (activeSlide.previousElementSibling) {
-//           activeSlide.previousElementSibling.classList.add("active");
-//         } else {
-//           slides[slides.length - 1].classList.add("active");
-//         }
-//       }
-//     });
-//   });
-// });
