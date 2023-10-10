@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const slider = document.querySelector(".yp-slider");
+  const autoplayInterval = 3000;
 
   const buildSlider = (slider, visibleSlides) => {
     // check if slider exists
@@ -53,6 +54,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.track.addEventListener("touchend", function (e) {
       handleSwipe(data, ui, touchStartX, touchEndX);
     });
+
+    return { visibleSlides, data, ui };
   };
 
   const throttle = (func, limit) => {
@@ -76,43 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
   };
-
-  // const moveSlide = (data, ui) => {
-  //   if (data.animating) return;
-  //   data.animating = true;
-
-  //   // ...
-  //   requestAnimationFrame(() => {
-  //     if (data.direction === 1) {
-  //       // move the first slide to the end
-  //       ui.track.appendChild(ui.slides[data.prev]);
-  //       ui.slides[data.prev].style.transform = `translateX(${data.width}px)`;
-
-  //       // move current slide to the left
-  //       ui.slides[
-  //         data.current
-  //       ].style.transform = `translateX(-${data.width}px)`;
-
-  //       // move next slide to the current position
-  //       ui.slides[data.next].style.transform = `translateX(0px)`;
-  //     } else if (data.direction === -1) {
-  //       // move the current slide to the end
-  //       ui.slides[data.current].style.transform = `translateX(${data.width}px)`;
-
-  //       // move the first slide to the current position
-  //       ui.slides[data.prev].style.transform = `translateX(0px)`;
-
-  //       // move the last slide to the first position
-  //       ui.track.insertBefore(ui.slides[ui.slides.length - 1], ui.slides[0]);
-  //       ui.slides[
-  //         ui.slides.length - 1
-  //       ].style.transform = `translateX(-${data.width}px)`;
-  //     }
-  //     data.animating = false;
-  //   });
-
-  //   updateSlides(data, ui);
-  // };
 
   const handleSwipe = (data, ui, touchStartX, touchEndX) => {
     if (touchEndX < touchStartX) {
@@ -174,17 +140,11 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(animate);
   };
 
-  // const shiftSlide = (data, ui, direction) => {
-  //   if (data.animating) return;
-  //   data.direction = direction;
-  //   moveSlide(data, ui);
-  // };
-
   const shiftSlide = throttle((data, ui, direction) => {
     if (data.animating) return;
     data.direction = direction;
     moveSlide(data, ui);
-  }, 600);
+  }, 500);
 
   const updateSlides = (data, ui) => {
     const newSlides = slider.querySelectorAll(".yp-slider__slide");
@@ -192,9 +152,9 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // get the slide width
-  const getSlideWidth = (slider, visible) => {
-    const sliderWidth = slider.getBoundingClientRect().width;
-    const slideWidth = sliderWidth / visible;
+  const getSlideWidth = (slider, visibleSlides) => {
+    const sliderWidth = slider.offsetWidth;
+    const slideWidth = sliderWidth / visibleSlides;
     return slideWidth;
   };
 
@@ -228,5 +188,28 @@ document.addEventListener("DOMContentLoaded", () => {
     updateSlides(data, ui);
   };
 
-  buildSlider(slider, 1);
+  const startAutoplay = (data, ui) => {
+    return setInterval(() => {
+      shiftSlide(data, ui, 1);
+    }, autoplayInterval);
+  };
+
+  const stopAutoplay = (autoplayId) => {
+    clearInterval(autoplayId);
+  };
+
+  const { visibleSlides, data, ui } = buildSlider(slider, 1);
+
+  // Start autoplay when the document is loaded
+  let autoplayId = startAutoplay(data, ui);
+
+  // Stop autoplay when the user interacts with the slider
+  slider.addEventListener("mouseenter", () => {
+    stopAutoplay(autoplayId);
+  });
+
+  // Resume autoplay when the user leaves the slider
+  slider.addEventListener("mouseleave", () => {
+    autoplayId = startAutoplay(data, ui);
+  });
 });

@@ -40,6 +40,7 @@ main {
   position: absolute;
   transition: transform 0.5s ease;
   transform: translate(-100%, 0);
+  padding: 1rem;
 }
 
 .yp-slider__slide:nth-child(1) {
