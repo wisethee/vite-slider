@@ -1,8 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const slider = document.querySelector(".yp-slider");
-  const autoplayInterval = 3000;
 
-  const buildSlider = (slider, visibleSlides) => {
+  const buildSlider = (slider, visibleSlides, autoplayInterval) => {
     // check if slider exists
     if (!slider) return;
 
@@ -29,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
       total: ui.slides.length,
       visible: visibleSlides,
       width: getSlideWidth(slider, visibleSlides),
+      autoplayInterval: autoplayInterval,
     };
 
     // initialize the slider
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
       handleSwipe(data, ui, touchStartX, touchEndX);
     });
 
-    return { visibleSlides, data, ui };
+    return { data, ui };
   };
 
   const throttle = (func, limit) => {
@@ -191,14 +191,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const startAutoplay = (data, ui) => {
     return setInterval(() => {
       shiftSlide(data, ui, 1);
-    }, autoplayInterval);
+    }, data.autoplayInterval);
   };
 
   const stopAutoplay = (autoplayId) => {
     clearInterval(autoplayId);
   };
 
-  const { visibleSlides, data, ui } = buildSlider(slider, 1);
+  const { data, ui } = buildSlider(slider, 1, 5000);
 
   // Start autoplay when the document is loaded
   let autoplayId = startAutoplay(data, ui);
